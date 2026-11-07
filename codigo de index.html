@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROTOINGENIERÍA 2026 - Dashboard Modular de Evaluación Técnico-Financiera</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        :root {
+            --bg-main: #030712;
+            --card-bg: #111827;
+            --border-color: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+
+        .light {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        .custom-card { background-color: var(--card-bg); border-color: var(--border-color); }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .badge-doc { background-color: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-supuesto { background-color: rgba(245, 158, 11, 0.15); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-est { background-color: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: #ffffff !important; color: #000000 !important; }
+            .custom-card { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+            canvas { max-height: 250px !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- SIDEBAR DE NAVEGACIÓN INDEPENDIENTE -->
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between no-print z-50 shrink-0">
+        <div>
+            <!-- Branding Head -->
+            <div class="p-4 border-b border-slate-800 flex items-center gap-3">
+                <div class="bg-white p-1 rounded-lg shadow border border-slate-200 shrink-0">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Logo_de_la_Universidad_Mariano_G%C3%A1lvez_de_Guatemala.png" 
+                         alt="Logo UMG" 
+                         class="h-8 w-auto object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/ffffff/003366?text=UMG';">
+                </div>
+                <div>
+                    <h1 class="text-sm font-black leading-none text-white tracking-wider">PROTOINGENIERÍA</h1>
+                    <p class="text-[10px] text-blue-400 font-bold mt-0.5">UMG Puerto Barrios • 2026</p>
+                </div>
+            </div>
+
+            <!-- Menú Navegación Modular -->
+            <nav class="p-3 space-y-1 text-xs">
+                <button onclick="navigateView('view-main')" id="nav-view-main" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold transition text-blue-400 bg-blue-950/60 border border-blue-800/60">
+                    <i class="fas fa-chart-pie w-4 text-center"></i>
+                    <span>1. Panel Principal</span>
+                </button>
+                <button onclick="navigateView('view-tech')" id="nav-view-tech" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-boxes-packing w-4 text-center"></i>
+                    <span>2. Técnica & Compactación</span>
+                </button>
+                <button onclick="navigateView('view-energy')" id="nav-view-energy" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-bolt w-4 text-center"></i>
+                    <span>3. Energía & Equipos</span>
+                </button>
+                <button onclick="navigateView('view-opex')" id="nav-view-opex" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-calculator w-4 text-center"></i>
+                    <span>4. Gastos & OPEX</span>
+                </button>
+                <button onclick="navigateView('view-capex')" id="nav-view-capex" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-coins w-4 text-center"></i>
+                    <span>5. Inversión CAPEX</span>
+                </button>
+                <button onclick="navigateView('view-fin')" id="nav-view-fin" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-chart-line w-4 text-center"></i>
+                    <span>6. Evaluación Financiera</span>
+                </button>
+                <button onclick="navigateView('view-exp')" id="nav-view-exp" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fas fa-flask w-4 text-center"></i>
+                    <span>7. Ensayos Google Sheets</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer Controls -->
+        <div class="p-3 border-t border-slate-800 space-y-2">
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition border border-slate-700 flex items-center justify-center gap-1.5">
+                    <i id="theme-icon" class="fas fa-moon text-blue-400"></i>
+                    <span id="theme-text">Modo Oscuro</span>
+                </button>
+                <button onclick="resetearValores()" title="Restablecer Valores" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition border border-slate-700">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+            <button onclick="window.print()" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition shadow flex items-center justify-center gap-1.5">
+                <i class="fas fa-file-pdf"></i> Exportar Informe
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENEDOR PRINCIPAL DE VENTANAS -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6 overflow-y-auto">
+
+        <!-- Banner Alertas Validación Global -->
+        <div id="container-validacion-alertas" class="hidden rounded-2xl p-4 border bg-rose-950/60 border-rose-700 text-rose-200 text-xs space-y-1">
+            <div class="flex items-center gap-2 font-bold text-rose-300">
+                <i class="fas fa-triangle-exclamation"></i> Entradas Incompletas o Inválidas Detectadas
+            </div>
+            <ul id="list-errores-validacion" class="list-disc list-inside space-y-0.5 text-[11px] text-rose-200"></ul>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 1 — PANEL PRINCIPAL (RESUMEN EJECUTIVO) -->
+        <!-- ========================================== -->
+        <section id="view-main" class="view-module space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-blue-500"></i> Ventana 1 — Estado General del Proyecto
+                    </h2>
+                    <p class="text-xs text-slate-400">Resumen ejecutivo consolidado del prototipo de compactación de viruta de aluminio.</p>
+                </div>
+                <span id="badge-eval-status" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                    Evaluando Modelo...
+                </span>
+            </div>
+
+            <!-- Grid KPI Cards Ejecutivas -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div class="custom-card border rounded-2xl p-3.5 shadow-lg flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inversión (CAPEX)</span>
+                    <div class="mt-2">
+                        <span id="kpi-capex-total" class="text-lg font-black text-white">Q 5,733.59</span>
+                        <span class="badge-doc text-[8px] px-1 rounded block w-fit mt-1">Presupuesto Real</span>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-3.5 shadow-lg flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">OPEX Mensual</span>
+                    <div class="mt-2">
+                        <span id="kpi-opex-mensual" class="text-lg font-black text-amber-400">Q 0.00</span>
+                        <span class="badge-est text-[8px] px-1 rounded block w-fit mt-1">Luz + Gas + MO + Manto.</span>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-3.5 shadow-lg flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ahorro Bruto Mes</span>
+                    <div class="mt-2">
+                        <span id="kpi-ahorro-bruto" class="text-lg font-black text-blue-400">Q 0.00</span>
+                        <span class="badge-supuesto text-[8px] px-1 rounded block w-fit mt-1">Fletes Hipotéticos</span>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-3.5 shadow-lg flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ahorro Neto Mes</span>
+                    <div class="mt-2">
+                        <span id="kpi-ahorro-neto" class="text-lg font-black text-emerald-400">Q 0.00</span>
+                        <span class="badge-est text-[8px] px-1 rounded block w-fit mt-1">Ahorro Bruto - OPEX</span>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-3.5 shadow-lg flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Payback Simple</span>
+                    <div class="mt-2">
+                        <span id="kpi-payback" class="text-lg font-black text-purple-400">0.0 Meses</span>
+                        <span class="badge-est text-[8px] px-1 rounded block w-fit mt-1">CAPEX / Ahorro Neto</span>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-3.5 shadow-lg flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ROI Anual</span>
+                    <div class="mt-2">
+                        <span id="kpi-roi-anual" class="text-lg font-black text-emerald-400">0.0%</span>
+                        <span class="badge-est text-[8px] px-1 rounded block w-fit mt-1">Neto Anual / CAPEX</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Diagnóstico Auditado -->
+            <div id="banner-diagnostico" class="rounded-2xl p-4 border transition-all duration-300 shadow-xl custom-card">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-blue-400">
+                        <i class="fas fa-magnifying-glass-chart text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 id="diag-title" class="text-sm font-bold text-white">Diagnóstico Técnico y Restricción Logística</h3>
+                        <p id="diag-desc" class="text-xs text-slate-300 mt-1 leading-relaxed">Inicializando análisis dinámico...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen Visual Comparativo & Proyección -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-6 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        <i class="fas fa-weight-hanging text-emerald-400 me-1"></i> Balance de Masa & Volumen Mensual (Editable)
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <label class="text-slate-400 block text-[10px] mb-1">Masa Procesada Mensual (kg):</label>
+                            <input type="number" id="main-input-masa" value="2640" step="100" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold font-mono text-sm">
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block text-[10px]">Reducción Volumétrica:</span>
+                            <span id="main-disp-reduc-vol" class="text-blue-400 text-sm font-bold">83.3% (6.0:1)</span>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block text-[10px]">Volumen Sin Compactar:</span>
+                            <span id="main-disp-vol-suelto" class="text-rose-400 font-bold">13.20 m³</span>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block text-[10px]">Volumen Compactado:</span>
+                            <span id="main-disp-vol-comp" class="text-emerald-400 font-bold">2.20 m³</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        <i class="fas fa-truck-space text-blue-400 me-1"></i> Restricción Logística de Fletes
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-xs font-mono">
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block text-[10px]">Viajes Sin Compactar:</span>
+                            <span id="main-disp-viajes-sin" class="text-white font-bold">1 viaje</span>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block text-[10px]">Viajes Con Compactar:</span>
+                            <span id="main-disp-viajes-con" class="text-emerald-400 font-bold">1 viaje</span>
+                        </div>
+                        <div class="col-span-2 bg-blue-950/40 p-2.5 rounded-xl border border-blue-500/30 flex justify-between items-center">
+                            <span class="text-blue-300 font-sans font-bold">Ahorro Logístico Bruto:</span>
+                            <span id="main-disp-ahorro-bruto" class="text-blue-400 text-sm font-bold">Q 0.00 / mes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 2 — EVALUACIÓN TÉCNICA Y COMPACTACIÓN -->
+        <!-- ========================================== -->
+        <section id="view-tech" class="view-module hidden space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fas fa-boxes-packing text-emerald-500"></i> Ventana 2 — Evaluación Técnica & Física de Compactación
+                </h2>
+                <p class="text-xs text-slate-400">Comportamiento volumétrico de la viruta de aluminio y análisis dual de fletes por peso y volumen.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800 custom-card">
+                    <span class="font-bold text-slate-200 block border-b border-slate-800 pb-1">Materia Prima & Densidades</span>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Masa Procesada Mensual (kg)</label>
+                        <input type="number" id="input-masa-mes" value="2640" step="100" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-emerald-400 font-bold font-mono">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Dens. Suelta (kg/m³)</label>
+                            <input type="number" id="input-dens-suelta" value="200" step="10" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Dens. Compactada</label>
+                            <input type="number" id="input-dens-comp" value="1200" step="50" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-emerald-300 font-mono text-center">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800 custom-card">
+                    <span class="font-bold text-slate-200 block border-b border-slate-800 pb-1">Capacidad Camión (Hipotético)</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Volumen Camión (m³)</label>
+                            <input type="number" id="input-truck-vol" value="15.0" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400">Carga Máx. (kg)</label>
+                            <input type="number" id="input-truck-peso" value="5000" step="250" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Costo Flete por Viaje (Q)</label>
+                        <input type="number" id="input-costo-flete" value="450.00" step="10" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-bold font-mono">
+                    </div>
+                </div>
+
+                <div class="space-y-2 bg-slate-950 p-4 rounded-xl border border-slate-800 custom-card flex flex-col justify-between">
+                    <span class="font-bold text-slate-300 block border-b border-slate-800 pb-1">Análisis de Restricción Dual</span>
+                    <div class="space-y-1.5 font-mono text-[11px]">
+                        <div class="flex justify-between items-center bg-slate-900 p-1.5 rounded">
+                            <span class="text-slate-400">Viajes Sin Compactar:</span>
+                            <span id="disp-viajes-sin" class="text-white font-bold">0 viajes</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-900 p-1.5 rounded">
+                            <span class="text-slate-400">Viajes Con Compactación:</span>
+                            <span id="disp-viajes-con" class="text-emerald-300 font-bold">0 viajes</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-900 p-1.5 rounded">
+                            <span class="text-slate-400">Reducción Real:</span>
+                            <span id="disp-dif-viajes" class="text-blue-400 font-bold">0 viajes ahorrados</span>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center bg-blue-950/40 p-2 rounded-lg border border-blue-500/30">
+                        <span class="text-[11px] text-blue-300 font-bold uppercase">Ahorro Bruto Logístico:</span>
+                        <span id="disp-ahorro-bruto-calc" class="text-blue-400 font-mono font-black text-sm">Q 0.00/mes</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 3 — ENERGÍA Y CONSUMO DE EQUIPOS -->
+        <!-- ========================================== -->
+        <section id="view-energy" class="view-module hidden space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fas fa-bolt text-amber-400"></i> Ventana 3 — Energía & Consumo de Equipos
+                </h2>
+                <p class="text-xs text-slate-400">Cálculo de demanda eléctrica por equipo e integración de la etapa térmica de gas propano.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="custom-card border rounded-2xl p-4 shadow-xl space-y-3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                            <span class="font-bold text-white text-xs">Motor Principal Truper</span>
+                            <span class="badge-doc text-[9px] px-1.5 py-0.5 rounded">2.0 HP Documentado</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Voltaje (V)</label>
+                                    <input type="number" id="m1-voltage" value="115" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">I nominal (A)</label>
+                                    <input type="number" id="m1-amp" value="20.6" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">cos φ (Supuesto)</label>
+                                    <input type="number" id="m1-cosphi" value="0.85" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Horas/Día</label>
+                                    <input type="number" id="m1-horas" value="8" min="1" max="24" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 space-y-1 font-mono text-[10px]">
+                                <div class="flex justify-between"><span class="text-slate-400">P entrada:</span><span id="m1-kw-in" class="text-amber-400 font-bold">0.00 kW</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Consumo Mes:</span><span id="m1-kwh-mes" class="text-emerald-400 font-bold">0.00 kWh</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Costo Mes:</span><span id="m1-costo-mes" class="text-white font-bold">Q 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-4 shadow-xl space-y-3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                            <span class="font-bold text-white text-xs">Motor Banda (Auxiliar)</span>
+                            <span class="badge-supuesto text-[9px] px-1.5 py-0.5 rounded">0.5 HP Supuesto</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Voltaje (V)</label>
+                                    <input type="number" id="m2-voltage" value="115" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">I nominal (A)</label>
+                                    <input type="number" id="m2-amp" value="5.8" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">cos φ (Supuesto)</label>
+                                    <input type="number" id="m2-cosphi" value="0.80" step="0.01" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Horas/Día</label>
+                                    <input type="number" id="m2-horas" value="8" min="1" max="24" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 space-y-1 font-mono text-[10px]">
+                                <div class="flex justify-between"><span class="text-slate-400">P entrada:</span><span id="m2-kw-in" class="text-amber-400 font-bold">0.00 kW</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Consumo Mes:</span><span id="m2-kwh-mes" class="text-emerald-400 font-bold">0.00 kWh</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Costo Mes:</span><span id="m2-costo-mes" class="text-white font-bold">Q 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-4 shadow-xl space-y-3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                            <span class="font-bold text-white text-xs">Compresor Neumático</span>
+                            <span class="badge-est text-[9px] px-1.5 py-0.5 rounded">75 PSI Ref.</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div>
+                                <label class="text-[9px] text-slate-400 block">Potencia Compresor (kW)</label>
+                                <input type="number" id="comp-kw" value="1.50" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Ciclo Trabajo (%)</label>
+                                    <input type="number" id="comp-duty" value="40" step="5" min="5" max="100" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Horas/Día</label>
+                                    <input type="number" id="comp-horas" value="8" min="1" max="24" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 space-y-1 font-mono text-[10px]">
+                                <div class="flex justify-between"><span class="text-slate-400">P efectiva:</span><span id="comp-kw-eff" class="text-amber-400 font-bold">0.00 kW</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Consumo Mes:</span><span id="comp-kwh-mes" class="text-emerald-400 font-bold">0.00 kWh</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Costo Mes:</span><span id="comp-costo-mes" class="text-white font-bold">Q 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-card border rounded-2xl p-4 shadow-xl space-y-3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                            <span class="font-bold text-white text-xs">Horno de Gas Propano</span>
+                            <span class="badge-supuesto text-[9px] px-1.5 py-0.5 rounded">Etapa Térmica</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Quemador (kg/h)</label>
+                                    <input type="number" id="gas-burn-rate" value="0.80" step="0.05" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Precal. (min)</label>
+                                    <input type="number" id="gas-precal-min" value="15" step="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Horas Op/Día</label>
+                                    <input type="number" id="gas-horas-op" value="1.0" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-slate-400 block">Cap. Cilindro (kg)</label>
+                                    <input type="number" id="gas-tank-cap" value="11.35" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-mono text-center font-bold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-1">
+                                <label class="text-[9px] text-slate-400 block">Precio Cilindro (Q)</label>
+                                <input type="number" id="gas-tank-price" value="140.00" step="5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-mono text-center font-bold">
+                            </div>
+                            <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 space-y-1 font-mono text-[10px]">
+                                <div class="flex justify-between"><span class="text-slate-400">Gas por Día:</span><span id="gas-kg-ciclo" class="text-rose-300 font-bold">0.00 kg</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Consumo Mes:</span><span id="gas-kg-mes" class="text-rose-400 font-bold">0.00 kg</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Costo Gas Mes:</span><span id="gas-costo-mes" class="text-white font-bold">Q 0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 4 — GASTOS FIJOS Y GASTOS OPERATIVOS -->
+        <!-- ========================================== -->
+        <section id="view-opex" class="view-module hidden space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fas fa-calculator text-amber-500"></i> Ventana 4 — Gastos Fijos & Operativos (OPEX)
+                </h2>
+                <p class="text-xs text-slate-400">Consolidación de costos variables, energía, repuestos y mano de obra incremental.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 custom-card border rounded-2xl p-4 shadow-xl space-y-4">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        Configuración de Costos Variables & Mano de Obra
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Tarifa Eléctrica (Q/kWh)</label>
+                            <input type="number" id="input-tarifa-kwh" value="1.85" step="0.05" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white font-mono font-bold">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Tipo Mano de Obra</label>
+                            <select id="select-tipo-mo" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-amber-300 font-bold">
+                                <option value="existente">Existente (Sin Costo Extra)</option>
+                                <option value="incremental" selected>Contratación Incremental</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Costo Hora MO (Q/hr)</label>
+                            <input type="number" id="input-mano-obra" value="25.00" step="1" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-white font-mono font-bold">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Mantenimiento (Q/mes)</label>
+                            <input type="number" id="input-manto-prev" value="150.00" step="10" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-white font-mono font-bold">
+                        </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Repuestos (Q/mes)</label>
+                            <input type="number" id="input-repuestos" value="100.00" step="10" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-white font-mono font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        Resumen OPEX Mensual Incremental
+                    </h3>
+                    <div class="space-y-2 font-mono text-xs">
+                        <div class="flex justify-between"><span class="text-slate-400">Energía Eléctrica Total:</span><span id="opex-disp-elec-tot" class="text-amber-400">Q 0.00</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Gas Propano Horno:</span><span id="opex-disp-gas-tot" class="text-rose-400">Q 0.00</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Mano de Obra Directa:</span><span id="opex-disp-mo" class="text-white">Q 0.00</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400">Mantenimiento + Repuestos:</span><span id="opex-disp-manto" class="text-white">Q 0.00</span></div>
+                        <div class="flex justify-between pt-2 border-t border-slate-800 font-bold text-sm text-emerald-400">
+                            <span>TOTAL OPEX MENSUAL:</span>
+                            <span id="opex-disp-total-mes">Q 0.00</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>OPEX ANUALIZADO:</span>
+                            <span id="opex-disp-total-anio" class="text-slate-300">Q 0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 5 — INVERSIÓN INICIAL Y PRESUPUESTO (CAPEX) -->
+        <!-- ========================================== -->
+        <section id="view-capex" class="view-module hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-coins text-emerald-400"></i> Ventana 5 — Presupuesto CAPEX de Construcción
+                    </h2>
+                    <p class="text-xs text-slate-400">Desglose de 50 ítems auditados del prototipo (Total Real: Q 5,733.59).</p>
+                </div>
+                <span id="capex-total-badge" class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950 px-3 py-1.5 rounded-lg border border-emerald-800">
+                    Total CAPEX: Q 5,733.59
+                </span>
+            </div>
+
+            <div class="custom-card border rounded-2xl p-4 shadow-xl">
+                <div class="overflow-x-auto max-h-[450px]">
+                    <table class="w-full text-left border-collapse text-[11px]">
+                        <thead class="sticky top-0 bg-slate-950 border-b border-slate-800 text-slate-400 font-mono text-[9px] uppercase z-10">
+                            <tr>
+                                <th class="py-2 px-2">Categoría</th>
+                                <th class="py-2 px-2">Descripción del Componente</th>
+                                <th class="py-2 px-2 text-center">Cant.</th>
+                                <th class="py-2 px-2 text-right">P. Unit (Q)</th>
+                                <th class="py-2 px-2 text-right">Total (Q)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-capex" class="divide-y divide-slate-800/50 text-slate-300 font-mono"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 6 — EVALUACIÓN FINANCIERA -->
+        <!-- ========================================== -->
+        <section id="view-fin" class="view-module hidden space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fas fa-chart-line text-purple-400"></i> Ventana 6 — Evaluación Financiera & Proyección
+                </h2>
+                <p class="text-xs text-slate-400">Indicadores de rentabilidad (VAN Descontado, TIR Real, ROI y Payback Simple).</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-purple-400 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        <i class="fas fa-chart-pie me-1"></i> Distribución del Costo Energético
+                    </h3>
+                    <div class="relative min-h-[220px] bg-slate-950 p-2 rounded-xl border border-slate-800 flex items-center justify-center">
+                        <canvas id="chart-energy-pie"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                            <i class="fas fa-chart-area me-1"></i> Flujos Netos Acumulados
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <label class="text-[9px] text-slate-400 uppercase">Tasa Anual (%):</label>
+                            <input type="number" id="input-tasa-descuento" value="12.0" step="0.5" class="w-14 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs text-center text-white font-bold">
+                            <select id="select-escenario" onchange="calcularTodo()" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-emerald-400 font-bold">
+                                <option value="base">Base (Normal)</option>
+                                <option value="conservador">Conservador (-20% Fletes)</option>
+                                <option value="optimista">Optimista (+15% Fletes)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-[11px] mb-2">
+                        <div class="bg-slate-950 p-2 rounded border border-slate-800 text-center">
+                            <span class="text-slate-400 block text-[9px]">VAN (NPV 5 Años):</span>
+                            <span id="disp-van-val" class="text-emerald-400 font-bold">Q 0.00</span>
+                        </div>
+                        <div class="bg-slate-950 p-2 rounded border border-slate-800 text-center">
+                            <span class="text-slate-400 block text-[9px]">TIR (IRR Anual):</span>
+                            <span id="disp-tir-val" class="text-emerald-400 font-bold">0.0%</span>
+                        </div>
+                        <div class="bg-slate-950 p-2 rounded border border-slate-800 text-center">
+                            <span class="text-slate-400 block text-[9px]">Flujo Acumulado Año 5:</span>
+                            <span id="disp-flujo-5-val" class="text-white font-bold">Q 0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="relative min-h-[170px] bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <canvas id="chart-proyeccion-flujo"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VENTANA 7 — ENSAYOS GOOGLE SHEETS -->
+        <!-- ========================================== -->
+        <section id="view-exp" class="view-module hidden space-y-6">
+            <div class="border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fas fa-flask text-blue-400"></i> Ventana 7 — Ensayos Experimentales (Google Sheets)
+                </h2>
+                <p class="text-xs text-slate-400">Conexión en vivo para sincronización de datos de campo con Google Apps Script.</p>
+            </div>
+
+            <div class="custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-plug"></i> Conexión Google Apps Script WebApp
+                    </h3>
+                    <span id="gas-status-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-400">
+                        Desconectado
+                    </span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="gas-web-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-blue-500">
+                    <button onclick="guardarUrlGas()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i> Guardar y Sincronizar
+                    </button>
+                    <button onclick="fetchSheetRecords()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-sync"></i> Recargar Datos
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        Registrar Ensayo Medido de Multigeneración
+                    </h3>
+
+                    <form id="form-exp" onsubmit="submitExpRecord(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Fecha de Prueba</label>
+                            <input type="date" id="exp-fecha" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Masa Viruta (kg)</label>
+                                <input type="number" id="exp-masa" step="0.01" min="0.01" required placeholder="Ej: 5.50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Tiempo Operación (min)</label>
+                                <input type="number" id="exp-tiempo-op" step="0.1" min="0.1" required placeholder="Ej: 12.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-1">kWh Motor 1</label>
+                                <input type="number" id="exp-kwh-m1" step="0.01" min="0" placeholder="0.25" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-1">kWh Motor 2</label>
+                                <input type="number" id="exp-kwh-m2" step="0.01" min="0" placeholder="0.08" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-1">kWh Compresor</label>
+                                <input type="number" id="exp-kwh-comp" step="0.01" min="0" placeholder="0.15" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-mono">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Gas Consumido (kg)</label>
+                                <input type="number" id="exp-gas-kg" step="0.01" min="0" placeholder="Ej: 0.20" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-rose-300 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Precalentamiento (min)</label>
+                                <input type="number" id="exp-precal-min" step="1" min="0" value="15" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-400 mb-1">Observaciones</label>
+                            <textarea id="exp-obs" rows="2" placeholder="Notas de prueba..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white"></textarea>
+                        </div>
+
+                        <button type="submit" id="btn-sub-exp" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane"></i> Enviar Registro a Google Sheets
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-7 custom-card border rounded-2xl p-4 shadow-xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">
+                        Historial en Google Sheets
+                    </h3>
+                    <div class="overflow-x-auto max-h-[380px]">
+                        <table class="w-full text-left border-collapse text-[11px]" id="table-exp-logs">
+                            <thead class="sticky top-0 bg-slate-950 border-b border-slate-800 text-slate-400 font-mono text-[9px] uppercase">
+                                <tr>
+                                    <th class="py-2 px-2">ID</th>
+                                    <th class="py-2 px-2">Fecha</th>
+                                    <th class="py-2 px-2 text-right">Masa (kg)</th>
+                                    <th class="py-2 px-2 text-right">kWh Elec.</th>
+                                    <th class="py-2 px-2 text-right">Gas (kg)</th>
+                                    <th class="py-2 px-2">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-exp-logs" class="divide-y divide-slate-800/50 font-mono text-slate-300">
+                                <tr><td colspan="6" class="text-center py-4 text-slate-500 font-sans">No hay datos cargados aún.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER INSTITUCIONAL -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-3 fixed bottom-0 left-0 right-0 z-40 md:hidden no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center text-[10px] text-slate-400">
+            <p>© 2026 PROTOINGENIERÍA • UMG Puerto Barrios</p>
+        </div>
+    </footer>
+
+    <!-- LÓGICA JAVASCRIPT COMPLETA Y AUDITADA -->
+    <script>
+        const capexDataInicial = [
+            { id: 1, cat: "Estructura Bandas", desc: "Faja de la banda", cant: 1, unit: "UNIDAD", pUnit: 100.00 },
+            { id: 2, cat: "Estructura Bandas", desc: 'Angular de 1" por 3/16"', cant: 2, unit: "UNIDAD", pUnit: 98.00 },
+            { id: 3, cat: "Estructura Bandas", desc: 'Costaneras 2"x3"x6"', cant: 2, unit: "UNIDAD", pUnit: 166.00 },
+            { id: 4, cat: "Estructura Bandas", desc: 'Tubos galvanizados 1"x6m', cant: 2, unit: "UNIDAD", pUnit: 188.50 },
+            { id: 5, cat: "Estructura Bandas", desc: "Electrodo para soldadura", cant: 4, unit: "LIBRA", pUnit: 14.66 },
+            { id: 6, cat: "Estructura Bandas", desc: "Sprocket para moto 250", cant: 2, unit: "JUEGO", pUnit: 240.00 },
+            { id: 7, cat: "Estructura Bandas", desc: "Rodamientos de 28 mm", cant: 22, unit: "UNIDAD", pUnit: 29.60 },
+            { id: 8, cat: "Estructura Bandas", desc: 'Angular de 1" por 3/16" (Adicional)', cant: 1, unit: "UNIDAD", pUnit: 196.00 },
+            { id: 9, cat: "Estructura Bandas", desc: 'Tornillos acerados 3/8" x 1 1/2"', cant: 16, unit: "UNIDAD", pUnit: 3.50 },
+            { id: 10, cat: "Estructura Bandas", desc: "Varillas lisas", cant: 2, unit: "UNIDAD", pUnit: 55.00 },
+            { id: 11, cat: "Estructura Bandas", desc: "Grapas para faja motor (Par)", cant: 4, unit: "PAR", pUnit: 14.00 },
+            { id: 12, cat: "Estructura Bandas", desc: "Lámina desplegada", cant: 1, unit: "UNIDAD", pUnit: 170.00 },
+            { id: 13, cat: "Estructura Bandas", desc: "Grapas para faja motor (Adicional)", cant: 3, unit: "PAR", pUnit: 17.00 },
+            { id: 14, cat: "Estructura Bandas", desc: 'Tornillos 3/8" x 1 1/2"', cant: 10, unit: "UNIDAD", pUnit: 0.95 },
+            { id: 15, cat: "Estructura Bandas", desc: 'Tuercas de 3/8"', cant: 10, unit: "UNIDAD", pUnit: 0.25 },
+            { id: 16, cat: "Estructura Bandas", desc: 'Roldanas negras de 3/8"', cant: 10, unit: "UNIDAD", pUnit: 0.25 },
+            { id: 17, cat: "Estructura Bandas", desc: 'Tornillos acerados 3/8" x 1 1/2" (Ref)', cant: 8, unit: "UNIDAD", pUnit: 8.00 },
+            { id: 18, cat: "Estructura Bandas", desc: 'Tuercas corrientes de 1/2"', cant: 8, unit: "UNIDAD", pUnit: 0.45 },
+            { id: 19, cat: "Estructura Bandas", desc: 'Tornillos de 1/4" x 1 1/2"', cant: 6, unit: "UNIDAD", pUnit: 0.50 },
+            { id: 20, cat: "Estructura Bandas", desc: 'Tuerca ordinaria de 1/4"', cant: 6, unit: "UNIDAD", pUnit: 0.15 },
+            { id: 21, cat: "Estructura Bandas", desc: 'Tuercas de 1/2" acerada', cant: 2, unit: "UNIDAD", pUnit: 3.50 },
+            { id: 22, cat: "Estructura Bandas", desc: 'Tuercas galvanizadas de 1"', cant: 25, unit: "UNIDAD", pUnit: 1.75 },
+            { id: 23, cat: "Estructura Bandas", desc: 'Tuercas negras de 1"', cant: 25, unit: "UNIDAD", pUnit: 1.00 },
+            { id: 24, cat: "Estructura Bandas", desc: 'Tubos cuadrados de 1"', cant: 2, unit: "UNIDAD", pUnit: 115.00 },
+            { id: 25, cat: "Estructura Bandas", desc: 'Angular de 1" por 1/8"', cant: 1, unit: "UNIDAD", pUnit: 56.00 },
+            { id: 26, cat: "Estructura Bandas", desc: 'Angular de 1" por 1/8" (Doble)', cant: 2, unit: "UNIDAD", pUnit: 56.00 },
+            { id: 27, cat: "Estructura Bandas", desc: 'Tuercas negras de 3/8"', cant: 8, unit: "UNIDAD", pUnit: 1.00 },
+            { id: 28, cat: "Tablero Eléctrico", desc: "Caja metálica de protección", cant: 1, unit: "UNIDAD", pUnit: 220.00 },
+            { id: 29, cat: "Tablero Eléctrico", desc: "Contactor Industrial NxC 30-40A", cant: 1, unit: "UNIDAD", pUnit: 100.00 },
+            { id: 30, cat: "Tablero Eléctrico", desc: "Bimetálico NxR Guardamotor", cant: 1, unit: "UNIDAD", pUnit: 110.00 },
+            { id: 31, cat: "Tablero Eléctrico", desc: "Pulsador 22mm Rojo", cant: 1, unit: "UNIDAD", pUnit: 40.00 },
+            { id: 32, cat: "Tablero Eléctrico", desc: "Pulsador 22mm Verde", cant: 1, unit: "UNIDAD", pUnit: 40.00 },
+            { id: 33, cat: "Tablero Eléctrico", desc: "Riel DIN 35mm", cant: 1, unit: "UNIDAD", pUnit: 35.00 },
+            { id: 34, cat: "Tablero Eléctrico", desc: 'Cable TSJ 12 AWG', cant: 7, unit: "METRO", pUnit: 18.00 },
+            { id: 35, cat: "Conexiones Eléctricas", desc: "Terminal redonda amarilla", cant: 6, unit: "UNIDAD", pUnit: 2.00 },
+            { id: 36, cat: "Conexiones Eléctricas", desc: "Terminal hembra amarilla", cant: 6, unit: "UNIDAD", pUnit: 1.25 },
+            { id: 37, cat: "Conexiones Eléctricas", desc: "Espiga polarizada industrial", cant: 1, unit: "UNIDAD", pUnit: 9.00 },
+            { id: 38, cat: "Conexiones Eléctricas", desc: "Abrazadera plástica negra", cant: 10, unit: "UNIDAD", pUnit: 0.35 },
+            { id: 39, cat: "Conexiones Eléctricas", desc: "Motor Auxiliar 1/2 HP Banda", cant: 1, unit: "UNIDAD", pUnit: 850.00 },
+            { id: 40, cat: "Conexiones Eléctricas", desc: "Mano de Obra Base Sprocket Eje", cant: 1, unit: "SERVICIO", pUnit: 400.00 },
+            { id: 41, cat: "Pintura y Detalles", desc: 'Brocha de 1"', cant: 2, unit: "UNIDAD", pUnit: 4.00 },
+            { id: 42, cat: "Pintura y Detalles", desc: 'Brochas de 2"', cant: 2, unit: "UNIDAD", pUnit: 5.00 },
+            { id: 43, cat: "Pintura y Detalles", desc: "Nylon de protección", cant: 9, unit: "YARDA", pUnit: 13.00 },
+            { id: 44, cat: "Pintura y Detalles", desc: "Pintura anticorrosiva (1/4 galón)", cant: 2, unit: "UNIDAD", pUnit: 45.00 },
+            { id: 45, cat: "Herramientas e Insumos", desc: "Disco de pulir", cant: 1, unit: "UNIDAD", pUnit: 18.00 },
+            { id: 46, cat: "Herramientas e Insumos", desc: "Disco de lija", cant: 1, unit: "UNIDAD", pUnit: 13.00 },
+            { id: 47, cat: "Herramientas e Insumos", desc: 'Broca de 1/4"', cant: 1, unit: "UNIDAD", pUnit: 15.00 },
+            { id: 48, cat: "Herramientas e Insumos", desc: 'Broca de 3/8"', cant: 1, unit: "UNIDAD", pUnit: 15.00 },
+            { id: 49, cat: "Herramientas e Insumos", desc: 'Broca de 1/2"', cant: 1, unit: "UNIDAD", pUnit: 18.00 },
+            { id: 50, cat: "Herramientas e Insumos", desc: "Piedra de esmeril", cant: 1, unit: "UNIDAD", pUnit: 75.00 }
+        ];
+
+        let capexList = JSON.parse(JSON.stringify(capexDataInicial));
+        let chartEnergyPie = null;
+        let chartFlujo = null;
+        let isSyncingMasa = false;
+
+        const formatQ = (val) => isNaN(val) ? "Q 0.00" : new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(val);
+
+        function parseStrictNumber(val, defaultVal = 0) {
+            if (val === undefined || val === null || val === '') return defaultVal;
+            const num = Number(val);
+            return isNaN(num) ? defaultVal : num;
+        }
+
+        function parseStrictPositive(val, name, errores) {
+            if (val === undefined || val === null || val === '') {
+                errores.push(`El campo "${name}" se encuentra vacío.`);
+                return 0;
+            }
+            const num = Number(val);
+            if (isNaN(num)) {
+                errores.push(`El campo "${name}" no contiene un número válido.`);
+                return 0;
+            }
+            if (num < 0) {
+                errores.push(`El campo "${name}" no puede ser un número negativo.`);
+                return 0;
+            }
+            return num;
+        }
+
+        function navigateView(viewId) {
+            document.querySelectorAll('.view-module').forEach(v => v.classList.add('hidden'));
+            const target = document.getElementById(viewId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(b => {
+                b.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800";
+            });
+
+            const activeBtn = document.getElementById(`nav-${viewId}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold transition text-blue-400 bg-blue-950/60 border border-blue-800/60";
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                if (icon) icon.className = "fas fa-sun text-amber-500";
+                if (text) text.textContent = "Modo Claro";
+                localStorage.setItem('proto_theme', 'light');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                if (icon) icon.className = "fas fa-moon text-blue-400";
+                if (text) text.textContent = "Modo Oscuro";
+                localStorage.setItem('proto_theme', 'dark');
+            }
+        }
+
+        function renderCapexTable() {
+            const tbody = document.getElementById('tbody-capex');
+            if (!tbody) return 5733.59;
+            tbody.innerHTML = '';
+            let totalCapex = 0;
+
+            capexList.forEach((item, index) => {
+                const subtotal = item.cant * item.pUnit;
+                totalCapex += subtotal;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50 transition";
+                tr.innerHTML = `
+                    <td class="py-1.5 px-2 font-sans text-slate-400 text-[10px]">${item.cat}</td>
+                    <td class="py-1.5 px-2 font-sans text-white">${item.desc}</td>
+                    <td class="py-1.5 px-2 text-center">
+                        <input type="number" min="0" value="${item.cant}" oninput="updateCapexItem(${index}, 'cant', this.value)" class="w-12 bg-slate-800 border border-slate-700 rounded text-center text-white py-0.5">
+                    </td>
+                    <td class="py-1.5 px-2 text-right">
+                        <input type="number" step="0.01" min="0" value="${item.pUnit.toFixed(2)}" oninput="updateCapexItem(${index}, 'pUnit', this.value)" class="w-20 bg-slate-800 border border-slate-700 rounded text-right text-emerald-300 py-0.5 px-1">
+                    </td>
+                    <td class="py-1.5 px-2 text-right font-bold text-emerald-400">${formatQ(subtotal)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const badge = document.getElementById('capex-total-badge');
+            const kpi = document.getElementById('kpi-capex-total');
+            if (badge) badge.textContent = `Total CAPEX: ${formatQ(totalCapex)}`;
+            if (kpi) kpi.textContent = formatQ(totalCapex);
+            return totalCapex;
+        }
+
+        function updateCapexItem(index, prop, value) {
+            const val = parseFloat(value);
+            capexList[index][prop] = isNaN(val) ? 0 : val;
+            calcularTodo();
+        }
+
+        function syncMasaInputs(sourceId) {
+            if (isSyncingMasa) return;
+            isSyncingMasa = true;
+            const mainMasa = document.getElementById('main-input-masa');
+            const techMasa = document.getElementById('input-masa-mes');
+
+            if (sourceId === 'main-input-masa' && techMasa && mainMasa) {
+                techMasa.value = mainMasa.value;
+            } else if (sourceId === 'input-masa-mes' && mainMasa && techMasa) {
+                mainMasa.value = techMasa.value;
+            }
+            isSyncingMasa = false;
+        }
+
+        function validarEntradas() {
+            const errores = [];
+            
+            parseStrictPositive(document.getElementById('m1-voltage')?.value, 'Voltaje Motor 1', errores);
+            parseStrictPositive(document.getElementById('m1-amp')?.value, 'Corriente Motor 1', errores);
+            parseStrictPositive(document.getElementById('m2-voltage')?.value, 'Voltaje Motor 2', errores);
+            parseStrictPositive(document.getElementById('m2-amp')?.value, 'Corriente Motor 2', errores);
+            parseStrictPositive(document.getElementById('comp-kw')?.value, 'Potencia Compresor', errores);
+            parseStrictPositive(document.getElementById('gas-burn-rate')?.value, 'Consumo Quemador Propano', errores);
+            parseStrictPositive(document.getElementById('gas-tank-price')?.value, 'Precio Cilindro Gas', errores);
+            parseStrictPositive(document.getElementById('input-masa-mes')?.value, 'Masa Procesada Mensual', errores);
+
+            const alertBox = document.getElementById('container-validacion-alertas');
+            const alertList = document.getElementById('list-errores-validacion');
+            if (alertList) alertList.innerHTML = '';
+
+            if (errores.length > 0 && alertBox && alertList) {
+                errores.forEach(err => {
+                    const li = document.createElement('li');
+                    li.textContent = err;
+                    alertList.appendChild(li);
+                });
+                alertBox.classList.remove('hidden');
+                return false;
+            } else if (alertBox) {
+                alertBox.classList.add('hidden');
+                return true;
+            }
+            return true;
+        }
+
+        function calcularTodo() {
+            if (!validarEntradas()) return;
+            const capexTotalCalculado = renderCapexTable();
+
+            const diasMes = 22;
+            const tarifaKwh = parseStrictNumber(document.getElementById('input-tarifa-kwh')?.value, 1.85);
+
+            // 1. Motor 1
+            const m1V = parseStrictNumber(document.getElementById('m1-voltage')?.value, 115);
+            const m1A = parseStrictNumber(document.getElementById('m1-amp')?.value, 20.6);
+            const m1Cos = parseStrictNumber(document.getElementById('m1-cosphi')?.value, 0.85);
+            const m1Horas = parseStrictNumber(document.getElementById('m1-horas')?.value, 8);
+            const m1KwIn = (m1V * m1A * m1Cos) / 1000;
+            const m1KwhMes = m1KwIn * m1Horas * diasMes;
+            const m1CostoMes = m1KwhMes * tarifaKwh;
+
+            if (document.getElementById('m1-kw-in')) document.getElementById('m1-kw-in').textContent = `${m1KwIn.toFixed(2)} kW`;
+            if (document.getElementById('m1-kwh-mes')) document.getElementById('m1-kwh-mes').textContent = `${m1KwhMes.toFixed(1)} kWh`;
+            if (document.getElementById('m1-costo-mes')) document.getElementById('m1-costo-mes').textContent = formatQ(m1CostoMes);
+
+            // 2. Motor 2
+            const m2V = parseStrictNumber(document.getElementById('m2-voltage')?.value, 115);
+            const m2A = parseStrictNumber(document.getElementById('m2-amp')?.value, 5.8);
+            const m2Cos = parseStrictNumber(document.getElementById('m2-cosphi')?.value, 0.80);
+            const m2Horas = parseStrictNumber(document.getElementById('m2-horas')?.value, 8);
+            const m2KwIn = (m2V * m2A * m2Cos) / 1000;
+            const m2KwhMes = m2KwIn * m2Horas * diasMes;
+            const m2CostoMes = m2KwhMes * tarifaKwh;
+
+            if (document.getElementById('m2-kw-in')) document.getElementById('m2-kw-in').textContent = `${m2KwIn.toFixed(2)} kW`;
+            if (document.getElementById('m2-kwh-mes')) document.getElementById('m2-kwh-mes').textContent = `${m2KwhMes.toFixed(1)} kWh`;
+            if (document.getElementById('m2-costo-mes')) document.getElementById('m2-costo-mes').textContent = formatQ(m2CostoMes);
+
+            // 3. Compresor
+            const compKw = parseStrictNumber(document.getElementById('comp-kw')?.value, 1.5);
+            const compDuty = parseStrictNumber(document.getElementById('comp-duty')?.value, 40) / 100;
+            const compHoras = parseStrictNumber(document.getElementById('comp-horas')?.value, 8);
+            const compKwEff = compKw * compDuty;
+            const compKwhMes = compKwEff * compHoras * diasMes;
+            const compCostoMes = compKwhMes * tarifaKwh;
+
+            if (document.getElementById('comp-kw-eff')) document.getElementById('comp-kw-eff').textContent = `${compKwEff.toFixed(2)} kW`;
+            if (document.getElementById('comp-kwh-mes')) document.getElementById('comp-kwh-mes').textContent = `${compKwhMes.toFixed(1)} kWh`;
+            if (document.getElementById('comp-costo-mes')) document.getElementById('comp-costo-mes').textContent = formatQ(compCostoMes);
+
+            const elecKwTot = m1KwIn + m2KwIn + compKwEff;
+            const elecKwhTot = m1KwhMes + m2KwhMes + compKwhMes;
+            const elecCostoTot = m1CostoMes + m2CostoMes + compCostoMes;
+
+            // 4. Gas Propano
+            const burnRate = parseStrictNumber(document.getElementById('gas-burn-rate')?.value, 0.80);
+            const precalMin = parseStrictNumber(document.getElementById('gas-precal-min')?.value, 15);
+            const horasOpGas = parseStrictNumber(document.getElementById('gas-horas-op')?.value, 1.0);
+            const tankCap = parseStrictNumber(document.getElementById('gas-tank-cap')?.value, 11.35);
+            const tankPrice = parseStrictNumber(document.getElementById('gas-tank-price')?.value, 140.00);
+
+            const tiempoTotalGasHoras = (precalMin / 60) + horasOpGas;
+            const gasKgDia = burnRate * tiempoTotalGasHoras;
+            const gasKgMes = gasKgDia * diasMes;
+            const precioKgGas = tankCap > 0 ? (tankPrice / tankCap) : 0;
+            const gasCostoMes = gasKgMes * precioKgGas;
+
+            if (document.getElementById('gas-kg-ciclo')) document.getElementById('gas-kg-ciclo').textContent = `${gasKgDia.toFixed(2)} kg`;
+            if (document.getElementById('gas-kg-mes')) document.getElementById('gas-kg-mes').textContent = `${gasKgMes.toFixed(2)} kg`;
+            if (document.getElementById('gas-costo-mes')) document.getElementById('gas-costo-mes').textContent = formatQ(gasCostoMes);
+
+            // 5. Logística
+            const masaMesKg = parseStrictNumber(document.getElementById('input-masa-mes')?.value, 2640);
+            const densSuelta = parseStrictNumber(document.getElementById('input-dens-suelta')?.value, 200);
+            const densComp = parseStrictNumber(document.getElementById('input-dens-comp')?.value, 1200);
+            const truckVol = parseStrictNumber(document.getElementById('input-truck-vol')?.value, 15);
+            const truckPeso = parseStrictNumber(document.getElementById('input-truck-peso')?.value, 5000);
+            const costoFleteViaje = parseStrictNumber(document.getElementById('input-costo-flete')?.value, 450);
+
+            const volSueltoMes = densSuelta > 0 ? (masaMesKg / densSuelta) : 0;
+            const volCompMes = densComp > 0 ? (masaMesKg / densComp) : 0;
+
+            const viajesSinVol = Math.ceil(volSueltoMes / truckVol);
+            const viajesSinPeso = Math.ceil(masaMesKg / truckPeso);
+            const viajesSin = Math.max(viajesSinVol, viajesSinPeso);
+
+            const viajesConVol = Math.ceil(volCompMes / truckVol);
+            const viajesConPeso = Math.ceil(masaMesKg / truckPeso);
+            const viajesCon = Math.max(viajesConVol, viajesConPeso);
+
+            const difViajes = Math.max(0, viajesSin - viajesCon);
+            const ahorroLogisticoBruto = difViajes * costoFleteViaje;
+
+            if (document.getElementById('disp-viajes-sin')) document.getElementById('disp-viajes-sin').textContent = `${viajesSin} viajes`;
+            if (document.getElementById('disp-viajes-con')) document.getElementById('disp-viajes-con').textContent = `${viajesCon} viajes`;
+            if (document.getElementById('disp-dif-viajes')) document.getElementById('disp-dif-viajes').textContent = `${difViajes} viajes ahorrados`;
+            if (document.getElementById('disp-ahorro-bruto-calc')) document.getElementById('disp-ahorro-bruto-calc').textContent = formatQ(ahorroLogisticoBruto);
+            if (document.getElementById('kpi-ahorro-bruto')) document.getElementById('kpi-ahorro-bruto').textContent = formatQ(ahorroLogisticoBruto);
+
+            // Panel Principal
+            if (document.getElementById('main-disp-vol-suelto')) document.getElementById('main-disp-vol-suelto').textContent = `${volSueltoMes.toFixed(2)} m³`;
+            if (document.getElementById('main-disp-vol-comp')) document.getElementById('main-disp-vol-comp').textContent = `${volCompMes.toFixed(2)} m³`;
+            const reducPct = densSuelta > 0 ? ((1 - (densSuelta / densComp)) * 100).toFixed(1) : "0.0";
+            const reducRatio = densSuelta > 0 ? (densComp / densSuelta).toFixed(1) : "0.0";
+            if (document.getElementById('main-disp-reduc-vol')) document.getElementById('main-disp-reduc-vol').textContent = `${reducPct}% (${reducRatio}:1)`;
+            if (document.getElementById('main-disp-viajes-sin')) document.getElementById('main-disp-viajes-sin').textContent = `${viajesSin} viaje${viajesSin > 1 ? 's' : ''}`;
+            if (document.getElementById('main-disp-viajes-con')) document.getElementById('main-disp-viajes-con').textContent = `${viajesCon} viaje${viajesCon > 1 ? 's' : ''}`;
+            if (document.getElementById('main-disp-ahorro-bruto')) document.getElementById('main-disp-ahorro-bruto').textContent = `${formatQ(ahorroLogisticoBruto)} / mes`;
+
+            // 6. OPEX & KPIs Financieros
+            const tipoMo = document.getElementById('select-tipo-mo')?.value || 'incremental';
+            const manoObraHr = parseStrictNumber(document.getElementById('input-mano-obra')?.value, 25);
+            const mantoPrev = parseStrictNumber(document.getElementById('input-manto-prev')?.value, 150);
+            const repuestos = parseStrictNumber(document.getElementById('input-repuestos')?.value, 100);
+
+            const opexManoObraMes = tipoMo === 'incremental' ? (manoObraHr * 8 * diasMes) : 0;
+            const opexMantoTotalMes = mantoPrev + repuestos;
+            const opexTotalMensual = elecCostoTot + gasCostoMes + opexManoObraMes + opexMantoTotalMes;
+            const opexTotalAnual = opexTotalMensual * 12;
+
+            if (document.getElementById('opex-disp-elec-tot')) document.getElementById('opex-disp-elec-tot').textContent = formatQ(elecCostoTot);
+            if (document.getElementById('opex-disp-gas-tot')) document.getElementById('opex-disp-gas-tot').textContent = formatQ(gasCostoMes);
+            if (document.getElementById('opex-disp-mo')) document.getElementById('opex-disp-mo').textContent = formatQ(opexManoObraMes);
+            if (document.getElementById('opex-disp-manto')) document.getElementById('opex-disp-manto').textContent = formatQ(opexMantoTotalMes);
+            if (document.getElementById('opex-disp-total-mes')) document.getElementById('opex-disp-total-mes').textContent = formatQ(opexTotalMensual);
+            if (document.getElementById('opex-disp-total-anio')) document.getElementById('opex-disp-total-anio').textContent = formatQ(opexTotalAnual);
+            if (document.getElementById('kpi-opex-mensual')) document.getElementById('kpi-opex-mensual').textContent = formatQ(opexTotalMensual);
+
+            const ahorroNetoMensual = ahorroLogisticoBruto - opexTotalMensual;
+            if (document.getElementById('kpi-ahorro-neto')) document.getElementById('kpi-ahorro-neto').textContent = formatQ(ahorroNetoMensual);
+
+            if (ahorroNetoMensual > 0 && capexTotalCalculado > 0) {
+                const payback = capexTotalCalculado / ahorroNetoMensual;
+                if (document.getElementById('kpi-payback')) {
+                    document.getElementById('kpi-payback').textContent = `${payback.toFixed(1)} Meses`;
+                    document.getElementById('kpi-payback').className = "text-lg font-black text-purple-400";
+                }
+                if (document.getElementById('kpi-roi-anual')) document.getElementById('kpi-roi-anual').textContent = `${((ahorroNetoMensual * 12 / capexTotalCalculado) * 100).toFixed(1)}%`;
+            } else {
+                if (document.getElementById('kpi-payback')) {
+                    document.getElementById('kpi-payback').textContent = "No aplicable";
+                    document.getElementById('kpi-payback').className = "text-xs font-bold text-rose-400";
+                }
+                if (document.getElementById('kpi-roi-anual')) document.getElementById('kpi-roi-anual').textContent = "0.0%";
+            }
+
+            actualizarDiagnosticoAuditado(ahorroLogisticoBruto, opexTotalMensual, ahorroNetoMensual, viajesSin, viajesCon);
+            renderEnergyPie(m1CostoMes, m2CostoMes, compCostoMes, gasCostoMes);
+            renderProyeccionMultiescenario(capexTotalCalculado, ahorroLogisticoBruto, opexTotalMensual);
+        }
+
+        function actualizarDiagnosticoAuditado(ahorroBruto, opexMes, ahorroNeto, vSin, vCon) {
+            const badge = document.getElementById('badge-eval-status');
+            const title = document.getElementById('diag-title');
+            const desc = document.getElementById('diag-desc');
+            const banner = document.getElementById('banner-diagnostico');
+            if (!badge || !title || !desc || !banner) return;
+            
+            const difViajes = vSin - vCon;
+
+            if (ahorroNeto > 0) {
+                badge.textContent = "ESCENARIO RENTABLE";
+                badge.className = "px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-950 text-emerald-400 border border-emerald-700";
+                banner.className = "rounded-2xl p-4 border transition-all duration-300 shadow-xl bg-emerald-950/30 border-emerald-800/80";
+                title.textContent = "Reducción Efectiva de Fletes y Superávit Neto";
+                desc.textContent = `La compactación ahorra ${difViajes} viajes al mes. El ahorro bruto (${formatQ(ahorroBruto)}) cubre el OPEX mensual (${formatQ(opexMes)}), dejando un superávit neto de ${formatQ(ahorroNeto)}/mes.`;
+            } else if (difViajes === 0) {
+                badge.textContent = "RESTRICCIÓN POR PESO (AHORRO FLETES Q0.00)";
+                badge.className = "px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-950 text-amber-400 border border-amber-700";
+                banner.className = "rounded-2xl p-4 border transition-all duration-300 shadow-xl bg-amber-950/30 border-amber-800/80";
+                title.textContent = "La Restricción Logística de Peso Impide Reducir Viajes";
+                desc.textContent = `Aunque el volumen se reduce de forma drástica, la masa requerida determina que se necesiten ${vSin} viajes antes y después de compactar. El Ahorro Bruto es Q0.00, por lo que el OPEX genera un déficit mensual de ${formatQ(Math.abs(ahorroNeto))}.`;
+            } else {
+                badge.textContent = "DÉFICIT OPERATIVO INCREMENTAL";
+                badge.className = "px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-950 text-rose-400 border border-rose-700";
+                banner.className = "rounded-2xl p-4 border transition-all duration-300 shadow-xl bg-rose-950/30 border-rose-800/80";
+                title.textContent = "El OPEX Supera el Ahorro en Fletes";
+                desc.textContent = `Los costos incrementales de operación (${formatQ(opexMes)}) superan el ahorro bruto (${formatQ(ahorroBruto)}), produciendo un déficit neto de ${formatQ(ahorroNeto)}/mes.`;
+            }
+        }
+
+        function renderEnergyPie(m1C, m2C, compC, gasC) {
+            const canvas = document.getElementById('chart-energy-pie');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (chartEnergyPie) chartEnergyPie.destroy();
+
+            chartEnergyPie = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Motor 1 (2 HP)', 'Motor 2 (0.5 HP)', 'Compresor (75 PSI)', 'Horno (Propano)'],
+                    datasets: [{
+                        data: [m1C, m2C, compC, gasC],
+                        backgroundColor: ['#3b82f6', '#60a5fa', '#f59e0b', '#f43f5e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 9 } } } }
+                }
+            });
+        }
+
+        function renderProyeccionMultiescenario(capex, ahorroBrutoBaseMes, opexMes) {
+            const selectEsc = document.getElementById('select-escenario');
+            const escenario = selectEsc ? selectEsc.value : 'base';
+            let factor = 1.0;
+            if (escenario === 'conservador') factor = 0.8;
+            if (escenario === 'optimista') factor = 1.15;
+
+            const ahorroBrutoMesEscenario = ahorroBrutoBaseMes * factor;
+            const ahorroNetoMesEscenario = ahorroBrutoMesEscenario - opexMes;
+            const ahorroNetoAnualEscenario = ahorroNetoMesEscenario * 12;
+            const tasaDescuento = (parseStrictNumber(document.getElementById('input-tasa-descuento')?.value, 12.0)) / 100;
+
+            let acumulado = -capex;
+            const serieAcumulada = [-capex];
+            for (let i = 1; i <= 5; i++) {
+                acumulado += ahorroNetoAnualEscenario;
+                serieAcumulada.push(acumulado);
+            }
+
+            let van = -capex;
+            for (let t = 1; t <= 5; t++) {
+                van += ahorroNetoAnualEscenario / Math.pow(1 + tasaDescuento, t);
+            }
+
+            let tirText = "No aplicable";
+            if (ahorroNetoAnualEscenario > 0 && capex > 0) {
+                const npvFunc = (r) => {
+                    let val = -capex;
+                    for (let t = 1; t <= 5; t++) val += ahorroNetoAnualEscenario / Math.pow(1 + r, t);
+                    return val;
+                };
+
+                let low = -0.9, high = 5.0;
+                if (npvFunc(low) * npvFunc(high) < 0) {
+                    for (let i = 0; i < 100; i++) {
+                        let mid = (low + high) / 2;
+                        if (Math.abs(npvFunc(mid)) < 0.0001) { low = mid; break; }
+                        if (npvFunc(low) * npvFunc(mid) < 0) high = mid;
+                        else low = mid;
+                    }
+                    const tirPct = low * 100;
+                    if (tirPct > -50 && tirPct < 1000) tirText = `${tirPct.toFixed(1)}%`;
+                }
+            }
+
+            if (document.getElementById('disp-van-val')) document.getElementById('disp-van-val').textContent = formatQ(van);
+            if (document.getElementById('disp-tir-val')) document.getElementById('disp-tir-val').textContent = tirText;
+            if (document.getElementById('disp-flujo-5-val')) document.getElementById('disp-flujo-5-val').textContent = formatQ(acumulado);
+
+            const canvasFlujo = document.getElementById('chart-proyeccion-flujo');
+            if (!canvasFlujo) return;
+            const ctx = canvasFlujo.getContext('2d');
+            if (chartFlujo) chartFlujo.destroy();
+
+            chartFlujo = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Año 0', 'Año 1', 'Año 2', 'Año 3', 'Año 4', 'Año 5'],
+                    datasets: [{
+                        label: 'Flujo Acumulado (Q)',
+                        data: serieAcumulada,
+                        borderColor: van >= 0 ? '#10b981' : '#f43f5e',
+                        backgroundColor: van >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#64748b', font: { size: 9 } } },
+                        y: { ticks: { color: '#64748b', font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        function renderExpTable(records) {
+            const tbody = document.getElementById('tbody-exp-logs');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!records || records.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 6;
+                td.className = "text-center py-4 text-slate-500 font-sans";
+                td.textContent = "No hay datos registrados en el libro.";
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition";
+
+                const tdId = document.createElement('td');
+                tdId.className = "py-1.5 px-2 text-slate-400 font-mono text-[10px]";
+                tdId.textContent = r.id || '';
+
+                const tdFecha = document.createElement('td');
+                tdFecha.className = "py-1.5 px-2 text-white";
+                tdFecha.textContent = r.fecha || '';
+
+                const tdMasa = document.createElement('td');
+                tdMasa.className = "py-1.5 px-2 text-right text-emerald-400 font-bold";
+                tdMasa.textContent = parseStrictNumber(r.masaKg, 0).toFixed(2);
+
+                const tdKwh = document.createElement('td');
+                tdKwh.className = "py-1.5 px-2 text-right text-amber-300";
+                const totKwh = parseStrictNumber(r.kwhM1, 0) + parseStrictNumber(r.kwhM2, 0) + parseStrictNumber(r.kwhComp, 0);
+                tdKwh.textContent = totKwh.toFixed(2);
+
+                const tdGas = document.createElement('td');
+                tdGas.className = "py-1.5 px-2 text-right text-rose-300";
+                tdGas.textContent = parseStrictNumber(r.gasKg, 0).toFixed(2);
+
+                const tdObs = document.createElement('td');
+                tdObs.className = "py-1.5 px-2 text-slate-300 font-sans text-[10px] truncate max-w-[150px]";
+                tdObs.textContent = r.observaciones || '-';
+
+                tr.appendChild(tdId);
+                tr.appendChild(tdFecha);
+                tr.appendChild(tdMasa);
+                tr.appendChild(tdKwh);
+                tr.appendChild(tdGas);
+                tr.appendChild(tdObs);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function guardarUrlGas() {
+            const el = document.getElementById('gas-web-url');
+            if (!el) return;
+            const url = el.value.trim();
+            if (url) {
+                localStorage.setItem('gas_app_url', url);
+                fetchSheetRecords();
+            }
+        }
+
+        async function fetchSheetRecords() {
+            const url = localStorage.getItem('gas_app_url');
+            const badge = document.getElementById('gas-status-badge');
+            if (!url) return;
+
+            try {
+                const response = await fetch(`${url}?action=read`);
+                const data = await response.json();
+                if (data.status === 'success' && badge) {
+                    badge.textContent = "Conectado";
+                    badge.className = "px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+                    renderExpTable(data.data);
+                }
+            } catch (err) {
+                if (badge) {
+                    badge.textContent = "Error Conexión";
+                    badge.className = "px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950 text-rose-400 border border-rose-800";
+                }
+            }
+        }
+
+        async function submitExpRecord(e) {
+            e.preventDefault();
+            const url = localStorage.getItem('gas_app_url');
+            if (!url) {
+                alert("Configura la URL de Google Apps Script primero.");
+                return;
+            }
+
+            const payload = {
+                fecha: document.getElementById('exp-fecha').value,
+                masaKg: parseFloat(document.getElementById('exp-masa').value),
+                tiempoOpMin: parseFloat(document.getElementById('exp-tiempo-op').value),
+                kwhM1: parseFloat(document.getElementById('exp-kwh-m1').value) || 0,
+                kwhM2: parseFloat(document.getElementById('exp-kwh-m2').value) || 0,
+                kwhComp: parseFloat(document.getElementById('exp-kwh-comp').value) || 0,
+                gasKg: parseFloat(document.getElementById('exp-gas-kg').value) || 0,
+                precalMin: parseFloat(document.getElementById('exp-precal-min').value) || 15,
+                observaciones: document.getElementById('exp-obs').value
+            };
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                alert("¡Registro enviado a Google Sheets!");
+                document.getElementById('form-exp').reset();
+                setTimeout(fetchSheetRecords, 1500);
+            } catch (err) {
+                alert("Error al enviar el registro.");
+            }
+        }
+
+        function resetearValores() {
+            location.reload();
+        }
+
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('input', (evt) => {
+                if (evt.target.id === 'main-input-masa' || evt.target.id === 'input-masa-mes') {
+                    syncMasaInputs(evt.target.id);
+                }
+                calcularTodo();
+            });
+            el.addEventListener('change', (evt) => {
+                if (evt.target.id === 'main-input-masa' || evt.target.id === 'input-masa-mes') {
+                    syncMasaInputs(evt.target.id);
+                }
+                calcularTodo();
+            });
+        });
+
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('gas_app_url');
+            if (savedUrl && document.getElementById('gas-web-url')) {
+                document.getElementById('gas-web-url').value = savedUrl;
+                fetchSheetRecords();
+            }
+            calcularTodo();
+        };
+    </script>
+</body>
+</html>
